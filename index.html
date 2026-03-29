@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>息差防護專屬系統</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; background: #1a365d; color: white; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .card { background: white; color: #333; padding: 25px; border-radius: 20px; width: 100%; max-width: 350px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        h2 { text-align: center; color: #1a365d; font-size: 22px; margin-bottom: 25px; }
+        .control-group { margin-bottom: 25px; }
+        .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        label { font-weight: bold; font-size: 14px; color: #4a5568; }
+        .val-display { font-size: 18px; font-weight: bold; color: #3182ce; background: #ebf8ff; padding: 2px 10px; border-radius: 5px; }
+        /* 手拉滑桿樣式 */
+        input[type=range] { -webkit-appearance: none; width: 100%; height: 8px; background: #e2e8f0; border-radius: 5px; outline: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; background: #3182ce; border-radius: 50%; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .result-zone { background: #f8fafc; border-radius: 15px; padding: 15px; margin-top: 20px; border: 1px solid #e2e8f0; }
+        .result-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .result-item:last-child { border: none; background: #f0fff4; border-radius: 8px; padding: 10px; margin-top: 5px; }
+        .year-label { font-weight: bold; color: #718096; }
+        .bk-val { font-weight: bold; color: #2f855a; font-size: 18px; }
+        .drop-val { font-size: 12px; color: #e53e3e; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>🛡️ 息差防護試算</h2>
+        <div class="control-group">
+            <div class="label-row">
+                <label>目前匯率</label>
+                <span class="val-display" id="rVal">32.5</span>
+            </div>
+            <input type="range" id="rate" min="28" max="35" step="0.1" value="32.5" oninput="update()">
+        </div>
+        <div class="control-group">
+            <div class="label-row">
+                <label>美元預期收益 (%)</label>
+                <span class="val-display" id="uVal">5.0</span>
+            </div>
+            <input type="range" id="usd" min="3" max="7" step="0.1" value="5.0" oninput="update()">
+        </div>
+        <div class="result-zone">
+            <div id="results"></div>
+        </div>
+        <p style="font-size: 11px; color: #a0aec0; text-align: center; margin-top: 15px;">
+            *假設台幣原有收益 3.0% 固定不變<br>此為預估保本匯率，不代表實際獲利保證
+        </p>
+    </div>
+    <script>
+        function update() {
+            let r = parseFloat(document.getElementById('rate').value);
+            let u = parseFloat(document.getElementById('usd').value) / 100;
+            let t = 0.03; // 固定大姐原本的3%
+            document.getElementById('rVal').innerText = r.toFixed(1);
+            document.getElementById('uVal').innerText = (u*100).toFixed(1);
+            let html = '';
+            [1, 3, 5, 10].forEach(y => {
+                let b = r * Math.pow((1+t), y) / Math.pow((1+u), y);
+                let d = ((b-r)/r*100).toFixed(1);
+                html += `
+                    <div class="result-item">
+                        <span class="year-label">${y}年後</span>
+                        <div style="text-align: right">
+                            <span class="bk-val">${b.toFixed(2)}</span><br>
+                            <span class="drop-val">容許跌幅 ${d}%</span>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('results').innerHTML = html;
+        }
+        update(); // 初始化
+    </script>
+</body>
+</html>
